@@ -1,0 +1,13 @@
+<component name="libraryTable">
+  <library name="jdk1.8">
+    <CLASSES>
+      <root url="jar://$APPLICATION_HOME_DIR$/lib/forms_rt.jar!/" />
+      <root url="jar://D:/搜狗高速下载/mysql-connector-java-5.1.7-bin.jar!/" />
+    </CLASSES>
+    <JAVADOC />
+    <SOURCES>
+      <root url="file://C:/Program Files/Java/jdk1.8.0_91" />
+    </SOURCES>
+    <jarDirectory url="file://C:/Program Files/Java/jdk1.8.0_91" recursive="false" type="SOURCES" />
+  </library>
+</component>
