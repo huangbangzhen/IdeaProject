@@ -81,7 +81,7 @@ public class test {
         String sql = "SELECT Hwaddr ,name from mac limit 5";
         SQLHelper sqlHelper = new SQLHelper();
         ResultSet rs = sqlHelper.executeQuery(sql);
-        mac.removeAllItems();//清楚所有下拉表单，防止重复
+        mac.removeAllItems();//清楚所有下拉表单，防止重复....
         while (rs.next()) {
             mac.addItem(rs.getString("name") + "--" + rs.getString("Hwaddr"));
 
