@@ -1,19 +1,21 @@
 package util;
 
+import entity.mac;
+
 import java.io.InputStream;
 import java.sql.*;
-import java.util.Properties;
+import java.util.*;
 
 public class SQLHelper {
-	//¶¨ÒåÒªÊ¹ÓÃµÄ±äÁ¿
+	//ï¿½ï¿½ï¿½ï¿½ÒªÊ¹ï¿½ÃµÄ±ï¿½ï¿½ï¿½
 	private static Connection conn = null;
 	private static PreparedStatement ps = null;
 	private static ResultSet rs = null;
 	private static CallableStatement cs = null;
 
 	public static String driver = "com.mysql.jdbc.Driver";
-	public static String url = "jdbc:mysql://localhost:10000/hardinfo";
-	public static String userName = "huang";
+	public static String url = "jdbc:mysql://localhost:12345/info";
+	public static String userName = "root";
 	public static String password = "123456";
 
 	private static Properties pp = null;
@@ -35,7 +37,7 @@ public class SQLHelper {
 		return cs;
 	}
 
-	//¼ÓÔØÇý¶¯£¬Ö»ÐèÒªÒ»´Î
+	//ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Ö»ï¿½ï¿½ÒªÒ»ï¿½ï¿½
 	static{
 		try {
 			Class.forName(driver);
@@ -44,7 +46,7 @@ public class SQLHelper {
 		}
 	}
 
-	//µÃµ½Á¬½Ó
+	//ï¿½Ãµï¿½ï¿½ï¿½ï¿½ï¿½
 	public static Connection getConnection() {
 		try {
 			conn =DriverManager.getConnection(url, userName, password);
@@ -54,13 +56,13 @@ public class SQLHelper {
 		return conn;
 	}
 
-	//´¦Àí¶à¸öupdate/delete/insert
+	//ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½update/delete/insert
 	public static void executeUpdateMultiParams(String[] sql,
 												String[][]parameters) {
 		try {
-			//»ñµÃÁ¬½Ó
+			//ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½
 			conn =getConnection();
-			//¿ÉÄÜ´«¶àÌõsqlÓï¾ä
+			//ï¿½ï¿½ï¿½Ü´ï¿½ï¿½ï¿½ï¿½ï¿½sqlï¿½ï¿½ï¿½
 			conn.setAutoCommit(false);
 			for (int i =0; i < sql.length; i++) {
 				if(parameters[i] != null) {
@@ -80,62 +82,55 @@ public class SQLHelper {
 			}
 			throw new RuntimeException(e.getMessage());
 		} finally{
-			//¹Ø±Õ×ÊÔ´
+			//ï¿½Ø±ï¿½ï¿½ï¿½Ô´
 			close(rs,ps, conn);
 		}
 	}
 
 	//update/delete/insert
-	//sql¸ñÊ½:UPDATE tablename SET columnn = ? WHERE column = ?
+	//sqlï¿½ï¿½Ê½:UPDATE tablename SET columnn = ? WHERE column = ?
 	public static void executeUpdate(String sql, String[] parameters) {
 		try {
-			//1.´´½¨Ò»¸öps
+			//1.ï¿½ï¿½ï¿½ï¿½Ò»ï¿½ï¿½ps
 			conn =getConnection();
 			ps =conn.prepareStatement(sql);
-			//¸ø£¿¸³Öµ
+			//ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Öµ
 			if(parameters != null)
 				for (int i =0; i < parameters.length; i++) {
 					ps.setString(i + 1, parameters[i]);
 				}
-			// Ö´ÐÐ
+			// Ö´ï¿½ï¿½
 			ps.executeUpdate();
 		} catch(SQLException e) {
-			e.printStackTrace();// ¿ª·¢½×¶Î
+			e.printStackTrace();// ï¿½ï¿½ï¿½ï¿½ï¿½×¶ï¿½
 			throw new RuntimeException(e.getMessage());
 		} finally{
-			//¹Ø±Õ×ÊÔ´
+			//ï¿½Ø±ï¿½ï¿½ï¿½Ô´
 			close(rs,ps, conn);
 		}
 	}
 
 	//select
-	public static ResultSet executeQuery(String sql, String[] parameters){
+	public static ResultSet executeQuery(String sql) {
 		ResultSet rs= null;
-		try {
+		List<mac>list = new ArrayList();
+        try {
 			conn =getConnection();
 			ps =conn.prepareStatement(sql);
-			if(parameters != null) {
-				for (int i =0; i < parameters.length; i++) {
-					ps.setString(i + 1, parameters[i]);
-				}
-			}
 			rs =ps.executeQuery();
 		} catch(SQLException e) {
 			e.printStackTrace();
-			throw new RuntimeException(e.getMessage());
-		} finally{
-
 		}
 		return rs;
 	}
 
-	//µ÷ÓÃÎÞ·µ»ØÖµ´æ´¢¹ý³Ì
-	// ¸ñÊ½£º callprocedureName(parameters list)
+	//ï¿½ï¿½ï¿½ï¿½ï¿½Þ·ï¿½ï¿½ï¿½Öµï¿½æ´¢ï¿½ï¿½ï¿½ï¿½
+	// ï¿½ï¿½Ê½ï¿½ï¿½ callprocedureName(parameters list)
 	public static void callProc(String sql, String[] parameters) {
 		try {
 			conn =getConnection();
 			cs =conn.prepareCall(sql);
-			//¸ø£¿¸³Öµ
+			//ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Öµ
 			if(parameters != null) {
 				for (int i =0; i < parameters.length; i++)
 					cs.setObject(i + 1, parameters[i]);
@@ -145,12 +140,12 @@ public class SQLHelper {
 			e.printStackTrace();
 			throw new RuntimeException(e.getMessage());
 		} finally{
-			//¹Ø±Õ×ÊÔ´
+			//ï¿½Ø±ï¿½ï¿½ï¿½Ô´
 			close(rs,cs, conn);
 		}
 	}
 
-	//µ÷ÓÃ´øÓÐÊäÈë²ÎÊýÇÒÓÐ·µ»ØÖµµÄ´æ´¢¹ý³Ì
+	//ï¿½ï¿½ï¿½Ã´ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Ð·ï¿½ï¿½ï¿½Öµï¿½Ä´æ´¢ï¿½ï¿½ï¿½ï¿½
 	public static CallableStatement callProcInput(String sql, String[]inparameters) {
 		try {
 			conn =getConnection();
@@ -169,12 +164,12 @@ public class SQLHelper {
 		return cs;
 	}
 
-	//µ÷ÓÃÓÐ·µ»ØÖµµÄ´æ´¢¹ý³Ì
+	//ï¿½ï¿½ï¿½ï¿½ï¿½Ð·ï¿½ï¿½ï¿½Öµï¿½Ä´æ´¢ï¿½ï¿½ï¿½ï¿½
 	public static CallableStatement callProcOutput(String sql,Integer[]outparameters) {
 		try {
 			conn =getConnection();
 			cs =conn.prepareCall(sql);
-			//¸øout²ÎÊý¸³Öµ
+			//ï¿½ï¿½outï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Öµ
 			if(outparameters!=null)
 				for(int i=0;i<outparameters.length;i++)
 					cs.registerOutParameter(i+1, outparameters[i]);

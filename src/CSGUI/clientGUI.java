@@ -15,7 +15,10 @@ import java.io.IOException;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
 import java.net.Socket;
+import java.sql.Timestamp;
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Date;
 
 /**
  * Created by Administrator on 2017/4/17/017.
@@ -42,6 +45,16 @@ public class clientGUI {
                 }
             }
         });
+        search.addMouseListener(new MouseAdapter() {
+            @Override
+            public void mouseClicked(MouseEvent e) {
+                JFrame frame = new JFrame("test");
+                frame.setContentPane(new test().date);
+                frame.setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
+                frame.pack();
+                frame.setVisible(true);
+            }
+        });
     }
 
     public static void main(String[] args) {
@@ -56,6 +69,10 @@ public class clientGUI {
     //获取信息斌显示在textarea区域
 //获取信息模块
     public ArrayList infomation;
+
+    private void serch(MouseEvent e) {
+        new test();
+    }
 
     private void getinfo(MouseEvent e) throws IOException {
         int port;
@@ -125,7 +142,8 @@ public class clientGUI {
     }
 
 
-    //存储模块
+    //存储模块,获取数据后存进数据库
+
     private void saveinfo(MouseEvent e) throws IOException {
         Memory memory = (Memory) infomation.get(0);
         Os os = (Os) infomation.get(1);
@@ -135,32 +153,37 @@ public class clientGUI {
         Net net = (Net) infomation.get(5);
         SQLHelper sqLhelper = new SQLHelper();
         sqLhelper.getConnection();
+        Date date = new Date();//获得系统时间.
+        String nowTime = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss").format(date);//将时间格式转换成符合Timestamp要求的格式.
+        Timestamp dates = Timestamp.valueOf(nowTime);//把时间转换
         String sql[] = {
-                "INSERT INTO Memory (total,free,used,usedper) VALUES (?,?,?,?)",
-                "INSERT INTO Os (name,ip,Kernel,Vendorname,Vendor,DataModel,Version) VALUES (?,?,?,?,?,?,?)",
-                "INSERT INTO Who (UserNmae,Name,IP,UserDomain) VALUES (?,?,?,?)",
-                "INSERT INTO Net (Name,IP,Broadcast,Hwaddr,Netmask,Descrip,Type) VALUES (?,?,?,?,?,?,?)"
+                "INSERT INTO Memory (total,free,used,usedper,time,Hwaddr) VALUES (?,?,?,?,?,?)",
+                "INSERT INTO Os (name,ip,Kernel,Vendorname,Vendor,DataModel,Version,time,Hwaddr) VALUES (?,?,?,?,?,?,?,?,?)",
+                "INSERT INTO Who (UserNmae,Name,IP,UserDomain,time,Hwaddr) VALUES (?,?,?,?,?,?)",
+                "INSERT INTO Net (Name,IP,Broadcast,Hwaddr,Netmask,Descrip,Type,time) VALUES (?,?,?,?,?,?,?,?)",
+                "INSERT IGNORE INTO mac (Name,Hwaddr) VALUES (?,?)"
         };
         String[][] parameters = {
-                {String.valueOf(memory.getTotal()), String.valueOf(memory.getFree()), String.valueOf(memory.getUsed()), String.valueOf(memory.getUsedper())},
-                {os.getName(), os.getIp(), os.getKernel(), os.getVendorname(), os.getVendor(), os.getDataModel(), os.getVersion()},
-                {who.getUserNmae(), who.getName(), who.getIP(), who.getUserDomain()},
-                {net.getName(), net.getIP(), net.getBroadcast(), net.getHwaddr(), net.getNetmask(), net.getDescrip(), net.getType()}
+                {String.valueOf(memory.getTotal()), String.valueOf(memory.getFree()), String.valueOf(memory.getUsed()), String.valueOf(memory.getUsedper()), String.valueOf(dates), net.getHwaddr()},
+                {os.getName(), os.getIp(), os.getKernel(), os.getVendorname(), os.getVendor(), os.getDataModel(), os.getVersion(), String.valueOf(dates), net.getHwaddr()},
+                {who.getUserNmae(), who.getName(), who.getIP(), who.getUserDomain(), String.valueOf(dates), net.getHwaddr()},
+                {net.getName(), net.getIP(), net.getBroadcast(), net.getHwaddr(), net.getNetmask(), net.getDescrip(), net.getType(), String.valueOf(dates)},
+                {net.getName(), net.getHwaddr()}
         };
         sqLhelper.executeUpdateMultiParams(sql, parameters);
-        String sqlc = "INSERT INTO CPU (num,MHZ,Vendor,Model,Usedper) VALUES (?,?,?,?,?)";
-        String sqld = "INSERT INTO Disk (Num,DevName,SysTypeName,total,Free,Usedper) VALUES (?,?,?,?,?,?)";
+        String sqlc = "INSERT INTO CPU (num,MHZ,Vendor,Model,Usedper,time,Hwaddr) VALUES (?,?,?,?,?,?,?)";
+        String sqld = "INSERT INTO Disk (Num,DevName,SysTypeName,total,Free,Usedper,time,Hwaddr) VALUES (?,?,?,?,?,?,?,?)";
         for (int i = 0; i < cpuarray.size(); i++) {
             CPU cpu = cpuarray.get(i);
-            String[] parac = {String.valueOf(cpu.getnum()), String.valueOf(cpu.getMHZ()), cpu.getVendor(), cpu.getModel(), String.valueOf(cpu.getUsedper())};
+            String[] parac = {String.valueOf(cpu.getnum()), String.valueOf(cpu.getMHZ()), cpu.getVendor(), cpu.getModel(), String.valueOf(cpu.getUsedper()), String.valueOf(dates), net.getHwaddr()};
             sqLhelper.executeUpdate(sqlc, parac);
         }
         for (int i = 0; i < diskarray.size(); i++) {
             Disk disk = diskarray.get(i);
-            String[] parad = {String.valueOf(disk.getNum()), disk.getDevName(), disk.getSysTypeName(), String.valueOf(disk.getTotal()), String.valueOf(disk.getFree()), String.valueOf(disk.getUsedper())};
+            String[] parad = {String.valueOf(disk.getNum()), disk.getDevName(), disk.getSysTypeName(), String.valueOf(disk.getTotal()), String.valueOf(disk.getFree()), String.valueOf(disk.getUsedper()), String.valueOf(dates), net.getHwaddr()};
             sqLhelper.executeUpdate(sqld, parad);
         }
-
+        JOptionPane.showInternalMessageDialog(sever, "save success", "save success", JOptionPane.INFORMATION_MESSAGE);
 
     }
 
@@ -205,7 +228,7 @@ public class clientGUI {
         label2.setText("port");
         sever.add(label2, new GridConstraints(0, 2, 1, 1, GridConstraints.ANCHOR_WEST, GridConstraints.FILL_NONE, GridConstraints.SIZEPOLICY_FIXED, GridConstraints.SIZEPOLICY_FIXED, null, null, null, 0, false));
         Port = new JTextField();
-        Port.setText("12345");
+        Port.setText("10000");
         sever.add(Port, new GridConstraints(0, 3, 1, 1, GridConstraints.ANCHOR_WEST, GridConstraints.FILL_HORIZONTAL, GridConstraints.SIZEPOLICY_WANT_GROW, GridConstraints.SIZEPOLICY_FIXED, null, new Dimension(100, -1), null, 0, false));
         getButton = new JButton();
         getButton.setText("get");

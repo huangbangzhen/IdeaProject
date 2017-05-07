@@ -26,7 +26,7 @@ public class Net implements Serializable {
         sigar = new Sigar();
         try {
             String[] ifaces = sigar.getNetInterfaceList();
-            NetInterfaceConfig cfg = sigar.getNetInterfaceConfig(ifaces[1]);
+            NetInterfaceConfig cfg = sigar.getNetInterfaceConfig(ifaces[4]);
             this.IP=cfg.getAddress();// IP地址
             this.Broadcast=cfg.getBroadcast();// 网关广播地址
             this.Hwaddr=cfg.getHwaddr();// 网卡MAC地址

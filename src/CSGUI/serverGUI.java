@@ -61,7 +61,7 @@ public class serverGUI {
             public void run() {
                 ServerSocket server = null;
                 try {
-                    server = new ServerSocket(12345);
+                    server = new ServerSocket(10000);
                 } catch (IOException e) {
                     e.printStackTrace();
                 }

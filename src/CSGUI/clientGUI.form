@@ -45,7 +45,7 @@
           </grid>
         </constraints>
         <properties>
-          <text value="12345"/>
+          <text value="10000"/>
         </properties>
       </component>
       <component id="ab420" class="javax.swing.JButton" binding="getButton" default-binding="true">
